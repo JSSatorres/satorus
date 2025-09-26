@@ -31,9 +31,8 @@ export function middleware(request: NextRequest) {
   if (pathname === "/") {
     if (token) {
       return NextResponse.redirect(new URL("/dashboard", request.url))
-    } else {
-      return NextResponse.redirect(new URL("/register", request.url))
     }
+    // Si no tiene token, permitir acceso a la landing page
   }
 
   return NextResponse.next()
