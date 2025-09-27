@@ -140,13 +140,13 @@ export const Footer = () => {
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a
-                href="#"
+                href="/terms"
                 className="text-gray-400 hover:text-orange-500 transition-colors text-sm"
               >
                 Términos y Condiciones
               </a>
               <a
-                href="#"
+                href="/privacy"
                 className="text-gray-400 hover:text-orange-500 transition-colors text-sm"
               >
                 Política de Privacidad
