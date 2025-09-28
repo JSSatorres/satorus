@@ -301,14 +301,14 @@ export const RestaurantForm = () => {
             <p>
               Al crear tu restaurante, aceptas nuestros{" "}
               <a
-                href="#"
+                href="/terms"
                 className="text-orange-500 hover:text-orange-600 underline"
               >
                 Términos y Condiciones
               </a>{" "}
               y{" "}
               <a
-                href="#"
+                href="/privacy"
                 className="text-orange-500 hover:text-orange-600 underline"
               >
                 Política de Privacidad
