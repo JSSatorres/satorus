@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { CookieBanner } from "@/components/CookieBanner"
 
 export default function HomePage() {
   const { isAuthenticated, loading } = useAuth()
@@ -315,24 +316,92 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
-                <Utensils className="w-6 h-6 text-white" />
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div className="md:col-span-2">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                  <Utensils className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">PideYa</h3>
+                  <p className="text-sm text-gray-400">Sistema de Pedidos</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-xl font-bold">PideYa</h3>
-                <p className="text-sm text-gray-400">Sistema de Pedidos</p>
-              </div>
+              <p className="text-gray-400 mb-4">
+                Revoluciona tu restaurante con pedidos digitales inteligentes.
+                Los clientes piden desde su móvil, tú gestionas todo desde una
+                plataforma.
+              </p>
             </div>
-            <div className="text-center md:text-right">
-              <p className="text-gray-400">
+
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Enlaces Rápidos</h4>
+              <ul className="space-y-2">
+                <li>
+                  <button
+                    onClick={() => router.push("/")}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    Inicio
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => router.push("/login")}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    Iniciar Sesión
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => router.push("/register")}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    Registrarse
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2">
+                <li>
+                  <button
+                    onClick={() => router.push("/terms")}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    Términos y Condiciones
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => router.push("/privacy")}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    Política de Privacidad
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p className="text-gray-400 mb-4 md:mb-0">
                 © 2024 PideYa. Todos los derechos reservados.
+              </p>
+              <p className="text-gray-500 text-sm">
+                Cumplimiento GDPR • Cookies • Protección de datos
               </p>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* Cookie Banner */}
+      <CookieBanner />
     </div>
   )
 }
