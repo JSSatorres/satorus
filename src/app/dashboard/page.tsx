@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/AuthContext"
 import { Dashboard } from "@/components/Dashboard"
@@ -8,14 +8,21 @@ import { Dashboard } from "@/components/Dashboard"
 export default function DashboardPage() {
   const { isAuthenticated, loading } = useAuth()
   const router = useRouter()
+  const [demoMode, setDemoMode] = useState(false)
 
   useEffect(() => {
+    // Si Firebase no está configurado, activar modo demo
+    if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+      setDemoMode(true)
+      return
+    }
+
     if (!loading && !isAuthenticated) {
       router.push("/register")
     }
   }, [isAuthenticated, loading, router])
 
-  if (loading) {
+  if (loading && !demoMode) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -28,10 +35,25 @@ export default function DashboardPage() {
     )
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !demoMode) {
     return null // Se redirigirá automáticamente
   }
 
-  return <Dashboard />
+  return (
+    <div>
+      {demoMode && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                <strong>Modo Demo:</strong> Firebase no configurado. Puedes
+                probar el escaneo de menú con datos de ejemplo.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      <Dashboard />
+    </div>
+  )
 }
-
