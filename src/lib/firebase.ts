@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app"
-import { getAuth, GoogleAuthProvider } from "firebase/auth"
+import { initializeApp, FirebaseApp } from "firebase/app"
+import { getAuth, GoogleAuthProvider, Auth } from "firebase/auth"
 
 // Configuración de Firebase - Reemplaza estos valores con los de tu proyecto
 const firebaseConfig = {
@@ -15,9 +15,9 @@ const firebaseConfig = {
 }
 
 // Solo inicializar Firebase si las variables están configuradas
-let app: any = null
-let auth: any = null
-let googleProvider: any = null
+let app: FirebaseApp | null = null
+let auth: Auth | null = null
+let googleProvider: GoogleAuthProvider | null = null
 
 try {
   // Verificar si las variables de entorno están configuradas
