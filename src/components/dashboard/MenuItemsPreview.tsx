@@ -20,7 +20,11 @@ interface MenuItemsPreviewProps {
   onCancel: () => void
 }
 
-export const MenuItemsPreview = ({ items: initialItems, onSave, onCancel }: MenuItemsPreviewProps) => {
+export const MenuItemsPreview = ({
+  items: initialItems,
+  onSave,
+  onCancel,
+}: MenuItemsPreviewProps) => {
   const [items, setItems] = useState<MenuItem[]>(initialItems)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editForm, setEditForm] = useState<MenuItem | null>(null)
@@ -62,14 +66,15 @@ export const MenuItemsPreview = ({ items: initialItems, onSave, onCancel }: Menu
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <Card className="w-full bg-white/90 max-w-4xl max-h-[90vh] overflow-y-auto">
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>Menú Extraído - Confirmar Items</CardTitle>
               <p className="text-sm text-gray-500 mt-1">
-                Se encontraron {items.length} platos. Revisa y edita antes de guardar.
+                Se encontraron {items.length} platos. Revisa y edita antes de
+                guardar.
               </p>
             </div>
             <Button variant="ghost" size="sm" onClick={onCancel}>
@@ -87,21 +92,32 @@ export const MenuItemsPreview = ({ items: initialItems, onSave, onCancel }: Menu
                     // Modo edición
                     <div className="space-y-3">
                       <div>
-                        <Label htmlFor={`name-${index}`}>Nombre del Plato *</Label>
+                        <Label htmlFor={`name-${index}`}>
+                          Nombre del Plato *
+                        </Label>
                         <Input
                           id={`name-${index}`}
                           value={editForm.name}
-                          onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, name: e.target.value })
+                          }
                           placeholder="Ej: Paella Valenciana"
                         />
                       </div>
 
                       <div>
-                        <Label htmlFor={`description-${index}`}>Descripción</Label>
+                        <Label htmlFor={`description-${index}`}>
+                          Descripción
+                        </Label>
                         <Input
                           id={`description-${index}`}
                           value={editForm.description || ""}
-                          onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              description: e.target.value,
+                            })
+                          }
                           placeholder="Ej: Arroz con mariscos y azafrán"
                         />
                       </div>
@@ -114,7 +130,12 @@ export const MenuItemsPreview = ({ items: initialItems, onSave, onCancel }: Menu
                             type="number"
                             step="0.01"
                             value={editForm.price}
-                            onChange={(e) => setEditForm({ ...editForm, price: parseFloat(e.target.value) || 0 })}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                price: parseFloat(e.target.value) || 0,
+                              })
+                            }
                             placeholder="15.50"
                           />
                         </div>
@@ -124,11 +145,18 @@ export const MenuItemsPreview = ({ items: initialItems, onSave, onCancel }: Menu
                           <select
                             id={`category-${index}`}
                             value={editForm.category || "General"}
-                            onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                category: e.target.value,
+                              })
+                            }
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
                             <option value="Entrantes">Entrantes</option>
-                            <option value="Platos principales">Platos principales</option>
+                            <option value="Platos principales">
+                              Platos principales
+                            </option>
                             <option value="Postres">Postres</option>
                             <option value="Bebidas">Bebidas</option>
                             <option value="General">General</option>
@@ -160,9 +188,13 @@ export const MenuItemsPreview = ({ items: initialItems, onSave, onCancel }: Menu
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h4 className="font-semibold text-lg">{item.name}</h4>
+                            <h4 className="font-semibold text-lg">
+                              {item.name}
+                            </h4>
                             {item.description && (
-                              <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {item.description}
+                              </p>
                             )}
                           </div>
                           <span className="text-lg font-bold text-blue-600 ml-4">
@@ -212,7 +244,10 @@ export const MenuItemsPreview = ({ items: initialItems, onSave, onCancel }: Menu
           <div className="flex gap-3 mt-6 pt-6 border-t">
             <Button
               onClick={() => onSave(items)}
-              disabled={items.length === 0 || items.some(item => !item.name || item.price <= 0)}
+              disabled={
+                items.length === 0 ||
+                items.some((item) => !item.name || item.price <= 0)
+              }
               className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
             >
               <Save className="w-4 h-4 mr-2" />
@@ -227,4 +262,3 @@ export const MenuItemsPreview = ({ items: initialItems, onSave, onCancel }: Menu
     </div>
   )
 }
-
