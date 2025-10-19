@@ -48,37 +48,76 @@ export async function POST(request: NextRequest) {
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" })
 
     // Convertir base64 a formato que acepta Gemini
-    const imageData = image.split(",")[1] // Remover el prefijo data:image/jpeg;base64,
+    let imageData = image
+    if (image.includes(",")) {
+      imageData = image.split(",")[1] // Remover el prefijo data:image/jpeg;base64,
+    }
 
-    const prompt = `Analiza esta imagen de un menú de restaurante y extrae TODOS los platos con su información.
+    if (!imageData) {
+      return NextResponse.json(
+        { error: "Datos de imagen inválidos" },
+        { status: 400 }
+      )
+    }
+
+    const prompt = `Analiza esta imagen de un menú de restaurante y extrae TODOS los platos organizándolos por categorías.
 
 Devuelve un JSON con el siguiente formato EXACTO (sin markdown, solo JSON puro):
 
 {
-  "menuItems": [
+  "categories": [
     {
-      "name": "Nombre del plato",
-      "description": "Descripción breve del plato (ingredientes, preparación)",
-      "price": 15.50,
-      "category": "Entrantes" (o "Platos principales", "Postres", "Bebidas", etc.)
+      "name": "Nombre de la categoría principal",
+      "subcategories": [
+        {
+          "name": "Subcategoría (opcional, solo si existe distinción clara)",
+          "items": [
+            {
+              "name": "Nombre del plato",
+              "description": "Descripción breve del plato",
+              "price": 15.50
+            }
+          ]
+        }
+      ]
     }
   ]
 }
 
-REGLAS IMPORTANTES:
-1. Extrae TODOS los platos que veas en la imagen
-2. Si no hay descripción, déjala vacía ""
-3. El precio DEBE ser un número decimal (ejemplo: 12.50, 8.99)
-4. Categoriza los platos según su tipo
-5. Si no puedes leer algo claramente, omítelo
-6. SOLO devuelve JSON válido, nada más
+REGLAS DE CATEGORIZACIÓN:
+1. CATEGORÍAS PRINCIPALES OBLIGATORIAS (si existen en el menú):
+   - "Comida" o "Platos principales" (pizzas, hamburguesas, pasta, etc.)
+   - "Bebidas" (refrescos, cervezas, vinos, etc.)
+   - "Postres" (tartas, helados, etc.)
+   - "Entrantes" (ensaladas, sopas, etc.)
+
+2. SUBCATEGORÍAS (solo si el menú las distingue claramente):
+   - Dentro de "Comida": "Pizzas", "Hamburguesas", "Pasta", "Focaccias", etc.
+   - Dentro de "Bebidas": "Refrescos", "Cervezas", "Vinos", etc.
+   - Dentro de "Postres": "Tartas", "Helados", etc.
+
+3. REGLAS IMPORTANTES:
+   - Extrae TODOS los platos que veas en la imagen
+   - Si no hay descripción, déjala vacía ""
+   - El precio DEBE ser un número decimal (ejemplo: 12.50, 8.99)
+   - Si no puedes leer algo claramente, omítelo
+   - Si no hay subcategorías claras, pon todos los items directamente en la categoría principal
+   - SOLO devuelve JSON válido, nada más
 
 Analiza la imagen y devuelve el JSON:`
+
+    // Detectar tipo MIME de la imagen
+    let mimeType = "image/jpeg"
+    if (image.startsWith("data:image/png")) {
+      mimeType = "image/png"
+    } else if (image.startsWith("data:image/webp")) {
+      mimeType = "image/webp"
+    }
 
     const result = await model.generateContent([
       {
         inlineData: {
-          mimeType: "image/jpeg",
+          mimeType: mimeType,
           data: imageData,
         },
       },
