@@ -19,27 +19,69 @@ export async function POST(request: NextRequest) {
       // Modo demo: devolver datos de ejemplo
       return NextResponse.json({
         success: true,
-        menuItems: [
+        categories: [
           {
-            name: "Paella Valenciana",
-            description: "Arroz con mariscos, pollo y azafrán",
-            price: 15.5,
-            category: "Platos principales",
+            name: "Comida",
+            subcategories: [
+              {
+                name: "Pizzas",
+                items: [
+                  {
+                    name: "Pizza Margherita",
+                    description: "Tomate, mozzarella y albahaca",
+                    price: 12.5,
+                  },
+                  {
+                    name: "Pizza Pepperoni",
+                    description: "Tomate, mozzarella y pepperoni",
+                    price: 14.5,
+                  },
+                ],
+              },
+              {
+                name: "Focaccias",
+                items: [
+                  {
+                    name: "Focaccia Clásica",
+                    description: "Con aceite de oliva y romero",
+                    price: 8.5,
+                  },
+                ],
+              },
+            ],
           },
           {
-            name: "Gazpacho Andaluz",
-            description: "Sopa fría de tomate y verduras",
-            price: 6.5,
-            category: "Entrantes",
+            name: "Bebidas",
+            subcategories: [
+              {
+                name: "Refrescos",
+                items: [
+                  {
+                    name: "Coca-Cola",
+                    description: "Refresco de cola",
+                    price: 2.5,
+                  },
+                ],
+              },
+            ],
           },
           {
-            name: "Tarta de Santiago",
-            description: "Tarta de almendra tradicional",
-            price: 5.5,
-            category: "Postres",
+            name: "Postres",
+            subcategories: [
+              {
+                name: "Tartas",
+                items: [
+                  {
+                    name: "Tarta de Santiago",
+                    description: "Tarta de almendra tradicional",
+                    price: 5.5,
+                  },
+                ],
+              },
+            ],
           },
         ],
-        count: 3,
+        count: 5,
         demo: true,
       })
     }
@@ -141,45 +183,104 @@ Analiza la imagen y devuelve el JSON:`
     const menuData = JSON.parse(jsonText)
 
     // Validar estructura
-    if (!menuData.menuItems || !Array.isArray(menuData.menuItems)) {
+    if (!menuData.categories || !Array.isArray(menuData.categories)) {
       throw new Error("Formato de respuesta inválido")
     }
 
-    // Validar cada item
-    const validatedItems = menuData.menuItems
-      .filter(
-        (item: {
-          name?: unknown
-          price?: unknown
-          description?: string
-          category?: string
+    // Procesar categorías y subcategorías
+    const processedCategories = menuData.categories
+      .filter((category: { name?: unknown; subcategories?: unknown }) => {
+        return category.name && typeof category.name === "string"
+      })
+      .map(
+        (category: {
+          name: string
+          subcategories?: Array<{
+            name: string
+            items: Array<{
+              name: string
+              description?: string
+              price: number | string
+            }>
+          }>
         }) => {
-          return (
-            item.name &&
-            typeof item.name === "string" &&
-            item.price &&
-            !isNaN(parseFloat(String(item.price)))
-          )
+          const processedSubcategories =
+            category.subcategories
+              ?.filter((subcategory: { name?: unknown; items?: unknown }) => {
+                return (
+                  subcategory.name &&
+                  typeof subcategory.name === "string" &&
+                  subcategory.items &&
+                  Array.isArray(subcategory.items)
+                )
+              })
+              .map(
+                (subcategory: {
+                  name: string
+                  items: Array<{
+                    name: string
+                    description?: string
+                    price: number | string
+                  }>
+                }) => {
+                  const processedItems = subcategory.items
+                    .filter((item: { name?: unknown; price?: unknown }) => {
+                      return (
+                        item.name &&
+                        typeof item.name === "string" &&
+                        item.price &&
+                        !isNaN(parseFloat(String(item.price)))
+                      )
+                    })
+                    .map(
+                      (item: {
+                        name: string
+                        description?: string
+                        price: number | string
+                      }) => ({
+                        name: item.name.trim(),
+                        description: item.description?.trim() || "",
+                        price: parseFloat(String(item.price)),
+                      })
+                    )
+
+                  return {
+                    name: subcategory.name.trim(),
+                    items: processedItems,
+                  }
+                }
+              ) || []
+
+          return {
+            name: category.name.trim(),
+            subcategories: processedSubcategories,
+          }
         }
       )
-      .map(
-        (item: {
-          name: string
-          price: number | string
-          description?: string
-          category?: string
-        }) => ({
-          name: item.name.trim(),
-          description: item.description?.trim() || "",
-          price: parseFloat(String(item.price)),
-          category: item.category?.trim() || "General",
-        })
-      )
+
+    // Contar total de items
+    const totalItems = processedCategories.reduce(
+      (
+        total: number,
+        category: { subcategories: Array<{ items: Array<unknown> }> }
+      ) => {
+        return (
+          total +
+          category.subcategories.reduce(
+            (subTotal: number, subcategory: { items: Array<unknown> }) => {
+              return subTotal + subcategory.items.length
+            },
+            0
+          )
+        )
+      },
+      0
+    )
 
     return NextResponse.json({
       success: true,
-      menuItems: validatedItems,
-      count: validatedItems.length,
+      categories: processedCategories,
+      count: totalItems,
     })
   } catch (error) {
     console.error("Error al procesar imagen:", error)
