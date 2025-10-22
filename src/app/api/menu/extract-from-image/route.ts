@@ -102,22 +102,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const prompt = `Analiza esta imagen de un menú de restaurante y extrae TODOS los platos organizándolos por categorías.
+    const prompt = `IMPORTANTE: Debes devolver SOLO un JSON válido con la estructura EXACTA que te indico. NO uses markdown, NO añadas texto explicativo.
 
-Devuelve un JSON con el siguiente formato EXACTO (sin markdown, solo JSON puro):
+Analiza esta imagen de un menú de restaurante y extrae TODOS los platos organizándolos por categorías.
+
+ESTRUCTURA OBLIGATORIA (copia exactamente este formato):
 
 {
   "categories": [
     {
-      "name": "Nombre de la categoría principal",
+      "name": "Comida",
       "subcategories": [
         {
-          "name": "Subcategoría (opcional, solo si existe distinción clara)",
+          "name": "Kebabs y Durums",
           "items": [
             {
               "name": "Nombre del plato",
-              "description": "Descripción breve del plato",
-              "price": 15.50
+              "description": "Descripción del plato",
+              "price": 12.50
             }
           ]
         }
@@ -126,25 +128,13 @@ Devuelve un JSON con el siguiente formato EXACTO (sin markdown, solo JSON puro):
   ]
 }
 
-REGLAS DE CATEGORIZACIÓN:
-1. CATEGORÍAS PRINCIPALES OBLIGATORIAS (si existen en el menú):
-   - "Comida" o "Platos principales" (pizzas, hamburguesas, pasta, etc.)
-   - "Bebidas" (refrescos, cervezas, vinos, etc.)
-   - "Postres" (tartas, helados, etc.)
-   - "Entrantes" (ensaladas, sopas, etc.)
-
-2. SUBCATEGORÍAS (solo si el menú las distingue claramente):
-   - Dentro de "Comida": "Pizzas", "Hamburguesas", "Pasta", "Focaccias", etc.
-   - Dentro de "Bebidas": "Refrescos", "Cervezas", "Vinos", etc.
-   - Dentro de "Postres": "Tartas", "Helados", etc.
-
-3. REGLAS IMPORTANTES:
-   - Extrae TODOS los platos que veas en la imagen
-   - Si no hay descripción, déjala vacía ""
-   - El precio DEBE ser un número decimal (ejemplo: 12.50, 8.99)
-   - Si no puedes leer algo claramente, omítelo
-   - Si no hay subcategorías claras, pon todos los items directamente en la categoría principal
-   - SOLO devuelve JSON válido, nada más
+REGLAS:
+1. SIEMPRE usa "Comida" como categoría principal
+2. Crea subcategorías como: "Kebabs y Durums", "Hamburguesas", "Pizzas", "Bebidas", "Postres"
+3. Extrae TODOS los platos que veas
+4. Precio debe ser número decimal
+5. Si no hay descripción, usa ""
+6. SOLO devuelve el JSON, nada más
 
 Analiza la imagen y devuelve el JSON:`
 
@@ -182,9 +172,27 @@ Analiza la imagen y devuelve el JSON:`
     // Parsear JSON
     const menuData = JSON.parse(jsonText)
 
-    // Validar estructura
-    if (!menuData.categories || !Array.isArray(menuData.categories)) {
+    // Validar estructura - manejar tanto el formato nuevo como el antiguo
+    if (!menuData.categories && !menuData.menuItems) {
       throw new Error("Formato de respuesta inválido")
+    }
+
+    // Si viene en formato antiguo, convertir a formato nuevo
+    if (menuData.menuItems && !menuData.categories) {
+      const convertedData = {
+        categories: [
+          {
+            name: "Comida",
+            subcategories: [
+              {
+                name: "General",
+                items: menuData.menuItems,
+              },
+            ],
+          },
+        ],
+      }
+      menuData.categories = convertedData.categories
     }
 
     // Procesar categorías y subcategorías
