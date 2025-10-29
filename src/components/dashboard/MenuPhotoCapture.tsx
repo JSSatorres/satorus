@@ -31,7 +31,7 @@ export const MenuPhotoCapture = ({
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [showCamera, setShowCamera] = useState(false)
 
-  // Abrir cámara
+  // Abrir cámara  VayaPasss-2025
   const openCamera = async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -112,11 +112,56 @@ export const MenuPhotoCapture = ({
       }
 
       const data = await response.json()
+      console.log("Respuesta de la API:", data)
+
+      // Convertir la nueva estructura de categorías a la estructura plana esperada
+      const convertCategoriesToMenuItems = (categories: any[]): MenuItem[] => {
+        const items: MenuItem[] = []
+
+        console.log("Convirtiendo categorías:", categories)
+
+        categories.forEach((category) => {
+          console.log("Procesando categoría:", category.name)
+          if (category.subcategories && Array.isArray(category.subcategories)) {
+            category.subcategories.forEach((subcategory: any) => {
+              console.log("Procesando subcategoría:", subcategory.name)
+              if (subcategory.items && Array.isArray(subcategory.items)) {
+                subcategory.items.forEach((item: any) => {
+                  console.log("Procesando item:", item.name)
+                  items.push({
+                    name: item.name,
+                    description: item.description || "",
+                    price: item.price,
+                    category: subcategory.name,
+                  })
+                })
+              }
+            })
+          }
+        })
+
+        console.log("Total items convertidos:", items.length)
+        return items
+      }
+
+      // Manejar tanto la estructura antigua como la nueva
+      let menuItems: MenuItem[] = []
 
       if (data.menuItems && data.menuItems.length > 0) {
+        // Estructura antigua
+        console.log("Usando estructura antigua")
+        menuItems = data.menuItems
+      } else if (data.categories && data.categories.length > 0) {
+        // Nueva estructura con categorías
+        console.log("Usando nueva estructura con categorías")
+        menuItems = convertCategoriesToMenuItems(data.categories)
+        console.log("Items convertidos:", menuItems)
+      }
+
+      if (menuItems.length > 0) {
         setSuccess(true)
         setTimeout(() => {
-          onMenuExtracted(data.menuItems)
+          onMenuExtracted(menuItems)
         }, 1000)
       } else {
         setError(
@@ -239,7 +284,7 @@ export const MenuPhotoCapture = ({
               {isProcessing ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Procesando con IA...
+                  Procesando menú...
                 </>
               ) : success ? (
                 <>
@@ -247,7 +292,7 @@ export const MenuPhotoCapture = ({
                   ¡Menú extraído correctamente!
                 </>
               ) : (
-                "Extraer Menú con IA"
+                "Extraer Menú"
               )}
             </Button>
           )}
